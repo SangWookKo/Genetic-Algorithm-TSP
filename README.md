@@ -22,55 +22,52 @@ from pylab import legend
 #%matplotlib inline
 
 ################################################################################################################################################################
-'''
-프로그램을 실행하기 전에 수정해야 하는 부분; Matrix에 들어가는 도시 수
-'''
-# 오퍼레이터에 대한 확률값 #
+
+# Probability of operators#
 
 Crossover_Probability = 0.7
 Mutation_Probability = 0.002
 
-# 도시의 개수 및 인구 수 #
-
+## Defining Number of city & Population size
 popSize = 100 #100 #200 # 350
 '''
-city 수정
+city edition
 '''
 city = 48
 
 ################################################################################################################################################################
 
-# 1. 거리 행렬 불러오기 #
+## 1. load file & check distance matrix 
 test1 = pd.read_csv('48city.txt', sep = ",", header = None)
 '''
-마지막 열 제거
+Delete last column & Later i will upload distance matrix with txt file.
 '''
 test1 = test1.drop(48,1)
 
 '''
-city 인덱스 수정
+change city index
 '''
 test1.index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48]#,49,50]#,51]
 test1.columns = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48]#,49,50]#,51]
 
 ################################################################################################################################################################
 
-# 시작 시간 #
+## Calculate Start time#
 
 Start_Time = time.time()
 
 ########################################################################################################################
-# 초기해 생성 #
+## Initialize initial population#
 ########################################################################################################################
 
 Init_pop = [x for x in range(popSize)]
 
 for i in range(popSize):
     Init_pop[i] = random.sample(range(1,city+1), city)
-    #Init_pop[i].append(Init_pop[i][0])   <<<< 마지막에 자기 자신으로 돌아오는 것, Evaluation 하기 위해 필요
+    #Init_pop[i].append(Init_pop[i][0])   <<<< This code means that return to origin city. 
     
 ########################################################################################################################
-# 초기 해 출력 & 새롭게 생성된 자식들이 Population이 된다. #    
+## print Initial Solution, New generated offspring becomes New Population
 ########################################################################################################################
 
 Population = list(range(popSize))
@@ -95,13 +92,13 @@ Dummy_Space_New = []
 Dummy_Space_Second = []
 t = 0
 
-print("초기해 ", Init_pop)
+print("Initial Solution ", Init_pop)
 
 while t < 5000:
 
     
 ########################################################################################################################
-# 초기해를 평가; Evaluate Initial solution #
+## Evaluate Initial solution #
 ########################################################################################################################
 
     print(Population)
@@ -130,7 +127,7 @@ while t < 5000:
     for i in range(popSize):
         city_sum_dist[i] = sum(city_dist[Dummy_label[i]:Dummy_label[i+1]])
 
-    print("거리 평가", city_sum_dist)
+    print("Evaluate city's distance", city_sum_dist)
     
     total_fitness = sum(city_sum_dist)
 
@@ -145,16 +142,16 @@ while t < 5000:
     Best_Solution.append(city_sum_dist)#append(Sorted_Each_Solution)
     
 ########################################################################################################################
-# 룰랫 휠 선택; Roulette Wheel Selection #
+## Roulette Wheel Selection #
 ########################################################################################################################
     
-    Sample_TEST = [ (1000/f)**6.5 for f in city_sum_dist]
+    Sample_TEST = [ (1000/f)**6.5 for f in city_sum_dist] # You can fix number 6.5
     
     fit_Sample = sum(Sample_TEST)
     
     Roulette_Sample = [ f/fit_Sample for f in Sample_TEST ] 
     
-    probs = [sum(Roulette_Sample[:i+1]) for i in range(len(Roulette_Sample))] # 누적 합; Cummulative Summation #
+    probs = [sum(Roulette_Sample[:i+1]) for i in range(len(Roulette_Sample))] # Cummulative Summation #
     
     new_population = []
     new_population_sample = [x for x in range(popSize)]
@@ -171,7 +168,7 @@ while t < 5000:
         new_population[i] = new_population[i][:city]      
 
 ########################################################################################################################
-# 크로스오버, Crossover based on PMX method #
+## Crossover based on PMX method #
 ########################################################################################################################
 
     r = []
@@ -188,20 +185,20 @@ while t < 5000:
             parent_ind.append(i)
     if len(ind_r) <= 1 :
         no_crossover = new_population
-        print('크로스오버 할 필요 없다.')
+        print('You don't need to crossover')
         new_population = no_crossover
     else:
         if len(ind_r) % 2 == 0:
-            print('크로스 오버 짝수')
+            print('Even number crossover')
             cross_op = ind_r
         else:
-            print('크로스 오버 홀수')
+            print('Odd number crossover')
             cross_op = ind_r
             del cross_op[len(cross_op)-1]
             del parent_ind[len(parent_ind)-1]       
 
 ########################################################################################################################
-# 밑의 식이 변경되면서 origin의 값이 변경되는 것을 방지 #
+## prevent origin chromosome(below code) to change #
 ########################################################################################################################
 
     origin = list(range(len(cross_op)))
@@ -213,7 +210,7 @@ while t < 5000:
             origin[i][j] = cross_op[i][j]
         
 ########################################################################################################################
-# Crossover Two-Point 지정; Point를 Random하게 선정한다. #
+## Setting Crossover Two-Point; Points are Randomly selected#
 ########################################################################################################################
 
     Cross_Range = []
@@ -229,15 +226,15 @@ while t < 5000:
                 Cross_Range[0] = Cross_Range[0] + 1
                 Cross_Range[1] = Cross_Range[1] + 1  
 
-    print("첫 번째 Cut-Point", Cross_Range[0])
-    print("두 번째 Cut-Point", Cross_Range[1])
+    print("First Cut-Point", Cross_Range[0])
+    print("Second Cut-Point", Cross_Range[1])
 
     PMX_Sample = []
     PMX_Mapped = []
 
     if len(cross_op) > 0 :
     
-        r = random.random() # 랜덤하게 Cutting point 지정
+        r = random.random() # Randomly select Cutting points
     
         PMX_Sample = [x for x in range(len(cross_op))]
     
@@ -257,7 +254,7 @@ while t < 5000:
     PMX_Mapped
 
 ########################################################################################################################
-# Operator의 순서를 바꿔주는 것이다. #
+## Change the order of Operator #
 ########################################################################################################################
 
     Offspring_op = []
@@ -274,11 +271,11 @@ while t < 5000:
     for i in range(len(PMX_op)) :
         PMX_Mapped_second[i][Cross_Range[0]:Cross_Range[1]] = Offspring_op[i]
 
-    print(" 두 번째 Offspring_op ", Offspring_op)
-    print(" 두 번째 PMX_op ", PMX_op)
+    print(" Second Offspring_op ", Offspring_op)
+    print(" Second PMX_op ", PMX_op)
     
 ########################################################################################################################    
-# Very Important notion - PMX 오퍼레이터의 핵심 코드 #
+# Very Important notion - PMX operator' core code#
 ########################################################################################################################
 
     TEST_Sample1 = list(range(len(PMX_Mapped_second)))
@@ -314,7 +311,7 @@ while t < 5000:
     for i in range(len(TEST_Sample4)) :
         TEST_Sample5 = TEST_Sample5 + TEST_Sample4[i]
 
-    print(" 두 번째 PMX_Mapped_second 는 ",PMX_Mapped_second)
+    print(" Second PMX_Mapped_second; ",PMX_Mapped_second)
     print(" TEST_Sample1 ",TEST_Sample1) 
     print(" TEST_Sample2 ",TEST_Sample2)
     print(" TEST_Sample3 ",TEST_Sample3)
@@ -336,7 +333,7 @@ while t < 5000:
                     for q in range(len(parent_ind)) :
                         new_population[parent_ind[q]] = TEST_Sample1[q]
                         
-    print("바뀐 Test_Sample1", TEST_Sample1)
+    print("Changed Test_Sample1", TEST_Sample1)
     Changed_Chromosome.append(TEST_Sample1)
 
 ###########################################################################################################################        
@@ -349,7 +346,7 @@ while t < 5000:
     for i in range(len(new_population)):
         mutation_op[i] = list(range(city))
 
-# Mutation 할 것인지 판단하는 조건 #
+# Below Condition checks whether Mutation or not#
 
     for i in range(len(new_population)):
         for j in range(city):
@@ -366,7 +363,7 @@ while t < 5000:
                 new_population[i].insert( random.randrange(city),  new_population[i].pop(j) )
                 
 
-    print(t," 번째 해" ,new_population )
+    print(t," th Solution" ,new_population )
     Pop_New.append(new_population)    
     #Dist_Sum.append(Best_Solution)
     print(t)
@@ -427,9 +424,9 @@ plt.legend(['Total Solution'], loc ='best')
 
 
 ################################################################################################################################################################
-# 종료 시간 #
+## End calculation time#
 ################################################################################################################################################################
 End_Time = time.time()
 
 Elapsed = End_Time - Start_Time
-print(" 3. 총 소요 시간 = %s seconds --------------- " %(Elapsed))
+print(" 3. Total calculation time = %s seconds --------------- " %(Elapsed))
